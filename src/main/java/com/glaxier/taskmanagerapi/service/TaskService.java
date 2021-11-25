@@ -4,10 +4,12 @@ import com.glaxier.taskmanagerapi.model.Task;
 import com.glaxier.taskmanagerapi.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TaskService {
     List<Task> findAll();
+    Optional<Task> findById(String id);
     void deleteAll();
     Task save(Task task);
-    void delete(Task task);
+    void deleteById(String id);
 }

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -15,6 +16,11 @@ public class TaskServiceImpl implements TaskService{
     @Override
     public List<Task> findAll() {
         return taskRepository.findAll();
+    }
+
+    @Override
+    public Optional<Task> findById(String id) {
+        return taskRepository.findById(id);
     }
 
     @Override
@@ -28,7 +34,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public void delete(Task task) {
-        taskRepository.delete(task);
+    public void deleteById(String id) {
+        taskRepository.deleteById(id);
     }
 }

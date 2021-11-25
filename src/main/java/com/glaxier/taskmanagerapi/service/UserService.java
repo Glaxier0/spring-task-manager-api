@@ -11,4 +11,5 @@ public interface UserService {
     void deleteAll();
     User save(User user);
     void delete(User user);
+    void deleteById(String id);
 }
