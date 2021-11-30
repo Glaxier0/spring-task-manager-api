@@ -1,6 +1,8 @@
 package com.glaxier.taskmanagerapi.controller;
 
+import com.glaxier.taskmanagerapi.model.LoginForm;
 import com.glaxier.taskmanagerapi.model.User;
+import com.glaxier.taskmanagerapi.security.PasswordEncode;
 import com.glaxier.taskmanagerapi.service.PartialUpdate;
 import com.glaxier.taskmanagerapi.service.UserService;
 import lombok.AllArgsConstructor;
@@ -19,14 +21,28 @@ public class UsersController {
 
     UserService userService;
     PartialUpdate partialUpdate;
+    PasswordEncode passwordEncoder;
 
-    @PostMapping("/users")
+    @PostMapping("/users/registration")
     public ResponseEntity<User> saveUser(@Valid @RequestBody User user) {
         try {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             return new ResponseEntity<>(userService.save(user), HttpStatus.CREATED);
         } catch (Exception exception) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/users/login")
+    public ResponseEntity<User> login(@Valid @RequestBody LoginForm loginForm) {
+
+            Optional<User> userData = userService.findByEmail(loginForm.getEmail());
+            if (userData.isPresent()) {
+                if (passwordEncoder.passwordMatcher(loginForm.getPassword(), userData.get())) {
+                    return new ResponseEntity<>(userData.get(), HttpStatus.OK);
+                }
+            }
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/users")
