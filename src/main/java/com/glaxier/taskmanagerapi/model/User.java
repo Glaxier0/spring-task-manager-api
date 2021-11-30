@@ -3,6 +3,7 @@ package com.glaxier.taskmanagerapi.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -26,6 +27,7 @@ public class User {
     private String password;
     @Min(0)
     private Integer age;
+    private String token;
 
     public User(String name, String email, String password, Integer age) {
         this.name = name;
