@@ -2,12 +2,13 @@ package com.glaxier.taskmanagerapi.controller;
 
 import com.glaxier.taskmanagerapi.model.LoginForm;
 import com.glaxier.taskmanagerapi.model.User;
-import com.glaxier.taskmanagerapi.security.PasswordEncode;
 import com.glaxier.taskmanagerapi.service.PartialUpdate;
 import com.glaxier.taskmanagerapi.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -21,7 +22,8 @@ public class UsersController {
 
     UserService userService;
     PartialUpdate partialUpdate;
-    PasswordEncode passwordEncoder;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @PostMapping("/users/registration")
     public ResponseEntity<User> saveUser(@Valid @RequestBody User user) {
@@ -38,7 +40,7 @@ public class UsersController {
 
             Optional<User> userData = userService.findByEmail(loginForm.getEmail());
             if (userData.isPresent()) {
-                if (passwordEncoder.passwordMatcher(loginForm.getPassword(), userData.get())) {
+                if (passwordEncoder.matches(loginForm.getPassword(), userData.get().getPassword())) {
                     return new ResponseEntity<>(userData.get(), HttpStatus.OK);
                 }
             }
