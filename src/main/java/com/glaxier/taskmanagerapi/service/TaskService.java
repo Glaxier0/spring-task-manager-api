@@ -1,7 +1,6 @@
 package com.glaxier.taskmanagerapi.service;
 
 import com.glaxier.taskmanagerapi.model.Task;
-import com.glaxier.taskmanagerapi.model.User;
 
 import java.util.List;
 import java.util.Optional;

@@ -3,7 +3,6 @@ package com.glaxier.taskmanagerapi.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,7 +12,7 @@ import javax.validation.constraints.*;
 @ToString
 @Getter
 @Setter
-public class User {
+public class Users {
 
     @Id
     private String id;
@@ -29,7 +28,7 @@ public class User {
     private Integer age;
     private String token;
 
-    public User(String name, String email, String password, Integer age) {
+    public Users(String name, String email, String password, Integer age) {
         this.name = name;
         this.email = email;
         this.password = password;

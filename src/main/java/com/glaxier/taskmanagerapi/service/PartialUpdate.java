@@ -2,7 +2,7 @@ package com.glaxier.taskmanagerapi.service;
 
 
 import com.glaxier.taskmanagerapi.model.Task;
-import com.glaxier.taskmanagerapi.model.User;
+import com.glaxier.taskmanagerapi.model.Users;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
@@ -21,9 +21,9 @@ public class PartialUpdate {
 
     private Validator validator;
 
-    public Optional<User> userPartialUpdate(Map<Object, Object> user, Optional<User> userData) {
+    public Optional<Users> userPartialUpdate(Map<Object, Object> user, Optional<Users> userData) {
         user.forEach((key, value) -> {
-            Field field = ReflectionUtils.findField(User.class, (String) key);
+            Field field = ReflectionUtils.findField(Users.class, (String) key);
             field.setAccessible(true);
             ReflectionUtils.setField(field, userData.get(), value);
         });
@@ -41,8 +41,8 @@ public class PartialUpdate {
         return taskData;
     }
 
-    public void validateUser(User user) {
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
+    public void validateUser(Users user) {
+        Set<ConstraintViolation<Users>> violations = validator.validate(user);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
