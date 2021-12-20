@@ -1,12 +1,13 @@
 package com.glaxier.taskmanagerapi.Util;
 
+import com.glaxier.taskmanagerapi.model.Users;
 import com.glaxier.taskmanagerapi.service.UserDetailsImpl;
+import com.glaxier.taskmanagerapi.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import java.util.Date;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -21,12 +22,17 @@ public class JwtUtils {
     @Value("${jwt_expiration}")
     private int JWT_EXPIRATION;
 
+    UserService userService;
+
+    public JwtUtils(UserService userService) {
+        this.userService = userService;
+    }
+
     public String generateJwtToken(Authentication authentication) {
 
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername()))
+                .setSubject((userPrincipal.getEmail()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + JWT_EXPIRATION))
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
@@ -37,10 +43,16 @@ public class JwtUtils {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
     }
 
+
     public boolean validateJwtToken(String authToken) {
         try {
-            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(authToken);
-            return true;
+            Users user = userService.findByEmail(Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(authToken)
+                    .getBody().getSubject()).get();
+            if (user.getToken() != null) {
+                if (user.getToken().equals(authToken)) {
+                    return true;
+                }
+            }
         } catch (SignatureException e) {
             System.out.println("Invalid JWT signature: {}" + e.getMessage());
         } catch (MalformedJwtException e) {
