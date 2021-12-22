@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Document
 @ToString
@@ -26,7 +28,7 @@ public class Users {
     private String password;
     @Min(0)
     private Integer age;
-    private String token;
+    private List<String> tokens = new ArrayList<>();
 
     public Users(String name, String email, String password, Integer age) {
         this.name = name;
