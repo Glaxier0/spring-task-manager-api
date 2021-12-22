@@ -5,9 +5,10 @@ import com.glaxier.taskmanagerapi.service.UserDetailsImpl;
 import com.glaxier.taskmanagerapi.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import java.util.Date;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -48,10 +49,8 @@ public class JwtUtils {
         try {
             Users user = userService.findByEmail(Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(authToken)
                     .getBody().getSubject()).get();
-            if (user.getToken() != null) {
-                if (user.getToken().equals(authToken)) {
-                    return true;
-                }
+            if (user.getTokens().stream().anyMatch(authToken::equals)) {
+                return true;
             }
         } catch (SignatureException e) {
             System.out.println("Invalid JWT signature: {}" + e.getMessage());
@@ -66,5 +65,10 @@ public class JwtUtils {
         }
 
         return false;
+    }
+
+    public String getToken(HttpHeaders httpHeaders) {
+        String token = httpHeaders.get("authorization").get(0).substring(7);
+        return token;
     }
 }
