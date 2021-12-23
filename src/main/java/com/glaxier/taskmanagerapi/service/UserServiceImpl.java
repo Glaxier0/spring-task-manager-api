@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Override
@@ -51,13 +51,4 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         userRepository.deleteById(id);
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<Users> userData = userRepository.findByEmail(email);
-        if (userData.isEmpty()) {
-            throw new UsernameNotFoundException("Invalid username or password.");
-        }
-        Users user = userData.get();
-        return new User(user.getEmail(), user.getPassword(), new ArrayList<>());
-    }
 }

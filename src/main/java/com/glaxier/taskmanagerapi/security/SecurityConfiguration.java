@@ -1,6 +1,6 @@
 package com.glaxier.taskmanagerapi.security;
 
-import com.glaxier.taskmanagerapi.service.UserServiceImpl;
+import com.glaxier.taskmanagerapi.service.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,38 +18,38 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @AllArgsConstructor
 class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    UserServiceImpl userService;
-    JwtRequestFilter jwtRequestFilter;
+    UserDetailsServiceImpl userDetailsService;
+    AuthEntryPointJwt unauthorizedHandler;
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        super.configure(auth);
-        auth.userDetailsService(userService);
+    @Bean
+    public AuthTokenFilter authenticationJwtTokenFilter() {
+        return new AuthTokenFilter();
     }
 
     @Override
-    protected void configure(HttpSecurity security) throws Exception {
-        security
-                .csrf()
-                .disable()
-                .authorizeRequests()
-                .antMatchers("/users/login", "/users/registration")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        security.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+    protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+        authenticationManagerBuilder.userDetailsService(userDetailsService);
     }
 
-    @Bean public PasswordEncoder passwordEncoder() {
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Override
-    @Bean
-    protected AuthenticationManager authenticationManager() throws Exception {
-        return super.authenticationManager();
+    protected void configure(HttpSecurity http) throws Exception {
+        http.cors().and().csrf().disable()
+                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                .authorizeRequests().antMatchers("/users/login", "/users/registration").permitAll()
+                .anyRequest().authenticated();
+
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 }
