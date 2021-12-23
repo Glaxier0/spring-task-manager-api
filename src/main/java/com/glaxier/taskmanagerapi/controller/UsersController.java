@@ -1,10 +1,7 @@
 package com.glaxier.taskmanagerapi.controller;
 
 import com.glaxier.taskmanagerapi.Util.JwtUtils;
-import com.glaxier.taskmanagerapi.model.JwtResponse;
-import com.glaxier.taskmanagerapi.model.LoginForm;
-import com.glaxier.taskmanagerapi.model.ProfileResponse;
-import com.glaxier.taskmanagerapi.model.Users;
+import com.glaxier.taskmanagerapi.model.*;
 import com.glaxier.taskmanagerapi.security.AuthTokenFilter;
 import com.glaxier.taskmanagerapi.service.PartialUpdate;
 import com.glaxier.taskmanagerapi.service.UserDetailsImpl;
@@ -17,14 +14,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -99,9 +94,12 @@ public class UsersController {
 
     @PatchMapping("/users/me")
     public ResponseEntity<?> updateProfile(@RequestHeader HttpHeaders httpHeaders
-            , @RequestBody @Valid Map<Object, Object> user) {
+            , @RequestBody @Valid UpdateUser user) {
         String token = jwtUtils.getToken(httpHeaders);
         Optional<Users> userData = userService.findByEmail(jwtUtils.getUserNameFromJwtToken(token));
+        if (user.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         if (userData.isPresent()) {
             userData = partialUpdate.userPartialUpdate(user, userData);
             userService.save(userData.get());
