@@ -1,6 +1,7 @@
 package com.glaxier.taskmanagerapi.controller;
 
 import com.glaxier.taskmanagerapi.Util.JwtUtils;
+import com.glaxier.taskmanagerapi.model.JwtResponse;
 import com.glaxier.taskmanagerapi.model.LoginForm;
 import com.glaxier.taskmanagerapi.model.Users;
 import com.glaxier.taskmanagerapi.service.PartialUpdate;
@@ -9,10 +10,12 @@ import com.glaxier.taskmanagerapi.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,26 +47,35 @@ public class UsersController {
 
     @PostMapping("/users/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginForm loginForm) {
-        UserDetailsImpl userDetails;
-        String jwt;
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginForm.getEmail(),
-                            loginForm.getPassword()
-                    )
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            jwt = jwtUtils.generateJwtToken(authentication);
-            userDetails = (UserDetailsImpl) authentication.getPrincipal();
-            Users user = userService.findByEmail(userDetails.getEmail()).get();
-            user.setToken(jwt);
-        } catch (Exception e) {
-            System.out.println(e);
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(userDetails, HttpStatus.OK);
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginForm.getEmail(),
+                        loginForm.getPassword()
+                )
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+        Users user = userService.findByEmail(loginForm.getEmail()).get();
+        user.setToken(jwt);
+        userService.save(user);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return new ResponseEntity<>(
+                new JwtResponse(userDetails.getId(), userDetails.getUsername(),
+                        userDetails.getEmail(), userDetails.getAge(), jwt), HttpStatus.OK);
     }
+
+    @PostMapping("/users/logout")
+    public ResponseEntity<?> logout() {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user = userService.findByEmail(userDetails.getEmail()).get();
+        user.setToken(null);
+        userService.save(user);
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @PostMapping("/users/logoutAll")
 
     @GetMapping("/users")
     public List<Users> getUsers() {
