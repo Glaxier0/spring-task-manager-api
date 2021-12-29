@@ -1,5 +1,6 @@
 package com.glaxier.taskmanagerapi.controller;
 
+import com.glaxier.taskmanagerapi.Util.ImageResizer;
 import com.glaxier.taskmanagerapi.Util.JwtUtils;
 import com.glaxier.taskmanagerapi.model.*;
 import com.glaxier.taskmanagerapi.security.AuthTokenFilter;
@@ -7,6 +8,7 @@ import com.glaxier.taskmanagerapi.service.PartialUpdate;
 import com.glaxier.taskmanagerapi.service.UserDetailsImpl;
 import com.glaxier.taskmanagerapi.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +17,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,15 +39,18 @@ public class UsersController {
     PasswordEncoder passwordEncoder;
     JwtUtils jwtUtils;
     AuthTokenFilter authTokenFilter;
+    ImageResizer imageResizer;
 
     @PostMapping("/users/registration")
-    public ResponseEntity<Users> saveUser(@Valid @RequestBody Users user) {
-        try {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            return new ResponseEntity<>(userService.save(user), HttpStatus.CREATED);
-        } catch (Exception exception) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<?> saveUser(@Valid @RequestBody Users user) {
+        Optional<Users> usersData = userService.findByEmail(user.getEmail());
+        if (usersData.isPresent()) {
+            throw new DuplicateKeyException("Email already in use!");
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userService.save(user);
+        return new ResponseEntity<>(new ProfileResponse(user.getId(), user.getName(),
+                user.getEmail(), user.getAge()), HttpStatus.CREATED);
     }
 
     @PostMapping("/users/login")
@@ -74,6 +83,30 @@ public class UsersController {
         String token = jwtUtils.getToken(httpHeaders);
         Users user = userService.findByEmail(jwtUtils.getUserNameFromJwtToken(token)).get();
         user.setTokens(new ArrayList<>());
+        userService.save(user);
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/users/me/avatar", consumes = {})
+    public ResponseEntity<?> uploadAvatar(@RequestParam("avatar") MultipartFile avatar,
+                                          @RequestHeader HttpHeaders httpHeaders) throws NoSuchFileException, HttpMediaTypeNotSupportedException {
+        if (avatar.isEmpty()) {
+            throw new NoSuchFileException("Please upload image with jpg, jpeg or png extensions.");
+        }
+        if (!avatar.getContentType().substring(6).matches("jpg|png|jpeg")) {
+            throw new HttpMediaTypeNotSupportedException("Please upload image with jpg, jpeg or png extensions.");
+        }
+        System.out.println(avatar.getContentType());
+        String token = jwtUtils.getToken(httpHeaders);
+        Users user = userService.findByEmail(jwtUtils.getUserNameFromJwtToken(token)).get();
+
+        String resizedImageByteArray = null;
+        try {
+            resizedImageByteArray = imageResizer.resizeImage(avatar);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        user.setAvatar(resizedImageByteArray);
         userService.save(user);
         return new ResponseEntity<>(null, HttpStatus.OK);
     }

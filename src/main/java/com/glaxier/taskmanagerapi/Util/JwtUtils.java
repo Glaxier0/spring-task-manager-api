@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import java.util.Date;
+import java.util.Optional;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
@@ -47,10 +48,13 @@ public class JwtUtils {
 
     public boolean validateJwtToken(String authToken) {
         try {
-            Users user = userService.findByEmail(Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(authToken)
-                    .getBody().getSubject()).get();
-            if (user.getTokens().stream().anyMatch(authToken::equals)) {
-                return true;
+            Optional<Users> userData = userService.findByEmail(Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(authToken)
+                    .getBody().getSubject());
+            if (userData.isPresent()) {
+                Users user = userData.get();
+                if (user.getTokens().stream().anyMatch(authToken::equals)) {
+                    return true;
+                }
             }
         } catch (SignatureException e) {
             System.out.println("Invalid JWT signature: {}" + e.getMessage());

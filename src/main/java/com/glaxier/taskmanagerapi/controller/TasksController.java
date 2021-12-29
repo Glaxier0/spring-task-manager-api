@@ -1,12 +1,15 @@
 package com.glaxier.taskmanagerapi.controller;
 
+import com.glaxier.taskmanagerapi.Util.JwtUtils;
 import com.glaxier.taskmanagerapi.model.Task;
 import com.glaxier.taskmanagerapi.service.PartialUpdate;
 import com.glaxier.taskmanagerapi.service.TaskService;
+import com.glaxier.taskmanagerapi.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
 
 import java.util.List;
 import java.util.Map;
@@ -17,9 +20,15 @@ import java.util.Optional;
 public class TasksController {
     TaskService taskService;
     PartialUpdate partialUpdate;
+    JwtUtils jwtUtils;
+    UserService userService;
 
     @PostMapping("/tasks")
-    public ResponseEntity<Task> saveTask(@RequestBody Task task) {
+    public ResponseEntity<Task> saveTask(@RequestBody Task task, @RequestHeader HttpHeaders httpHeaders) {
+        String token = jwtUtils.getToken(httpHeaders);
+        String userId = userService.findByEmail(jwtUtils.getUserNameFromJwtToken(token)).get().getId();
+        System.out.println(userId);
+        task.setUserId(userId);
         try {
             return new ResponseEntity<>(taskService.save(task), HttpStatus.CREATED);
         } catch (Exception exception) {

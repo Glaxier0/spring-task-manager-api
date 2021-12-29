@@ -20,4 +20,5 @@ public class Task {
     @NotBlank
     private String description;
     private Boolean completed = false;
+    private String userId;
 }
