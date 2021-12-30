@@ -1,11 +1,13 @@
-package com.glaxier.taskmanagerapi.model;
+package com.glaxier.taskmanagerapi.model.pojo;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 @AllArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 @ToString
 public class ProfileResponse {
     private String id;

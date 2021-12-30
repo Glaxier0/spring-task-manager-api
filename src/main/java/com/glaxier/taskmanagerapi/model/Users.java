@@ -1,16 +1,17 @@
 package com.glaxier.taskmanagerapi.model;
 
+import com.glaxier.taskmanagerapi.model.pojo.UpdateUser;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,15 +37,11 @@ public class Users {
 
     @PositiveOrZero(message = "Age must be greater than or equal to 0.")
     private Integer age;
-    private List<String> tokens = new ArrayList<>();
-    private String avatar;
 
-    public Users(String name, String email, String password, Integer age) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.age = age;
-    }
+    private List<String> tokens = new ArrayList<>();
+    private ZonedDateTime createdAt;
+    private ZonedDateTime updatedAt;
+    private String avatar;
 
     public void updateUser(UpdateUser updateUser) {
         this.name = updateUser.getName() == null ? this.name : updateUser.getName();

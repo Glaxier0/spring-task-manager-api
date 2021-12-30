@@ -1,30 +1,25 @@
-package com.glaxier.taskmanagerapi.Util;
+package com.glaxier.taskmanagerapi.util;
 
 import com.glaxier.taskmanagerapi.model.Users;
-import com.glaxier.taskmanagerapi.service.UserDetailsImpl;
 import com.glaxier.taskmanagerapi.service.UserService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.glaxier.taskmanagerapi.service.userdetails.UserDetailsImpl;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
-import java.util.Date;
-import java.util.Optional;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.*;
+import java.util.Date;
+import java.util.Optional;
 
 @Component
 public class JwtUtils {
 
+    UserService userService;
     @Value("${secret_key}")
     private String SECRET_KEY;
-
     @Value("${jwt_expiration}")
     private int JWT_EXPIRATION;
-
-    UserService userService;
 
     public JwtUtils(UserService userService) {
         this.userService = userService;

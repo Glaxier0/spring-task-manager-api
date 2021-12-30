@@ -1,8 +1,7 @@
-package com.glaxier.taskmanagerapi.model;
+package com.glaxier.taskmanagerapi.model.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
@@ -10,7 +9,6 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 public class LoginForm {
 
     @NotBlank(message = "Email is required")

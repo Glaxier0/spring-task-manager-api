@@ -1,11 +1,4 @@
-package com.glaxier.taskmanagerapi.Util.ErrorHandler;
-
-import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
+package com.glaxier.taskmanagerapi.util.errorhandler;
 
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DuplicateKeyException;
@@ -30,6 +23,12 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.List;
 
 @ControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
@@ -89,7 +88,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     //
 
-    @ExceptionHandler({ MethodArgumentTypeMismatchException.class })
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class})
     public ResponseEntity<Object> handleMethodArgumentTypeMismatch(final MethodArgumentTypeMismatchException ex, final WebRequest request) {
 
         final String error = ex.getName() + " should be of type " + ex.getRequiredType().getName();
@@ -142,7 +141,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    @ExceptionHandler({ Exception.class })
+    @ExceptionHandler({Exception.class})
     public ResponseEntity<Object> handleAll(final Exception ex, final WebRequest request) {
         //
         final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage(), "error occurred");

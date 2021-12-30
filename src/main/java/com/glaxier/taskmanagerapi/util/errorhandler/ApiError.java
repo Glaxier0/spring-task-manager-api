@@ -1,4 +1,4 @@
-package com.glaxier.taskmanagerapi.Util.ErrorHandler;
+package com.glaxier.taskmanagerapi.util.errorhandler;
 
 import lombok.Getter;
 import lombok.Setter;

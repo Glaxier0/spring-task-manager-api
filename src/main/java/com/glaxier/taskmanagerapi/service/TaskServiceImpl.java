@@ -3,6 +3,8 @@ package com.glaxier.taskmanagerapi.service;
 import com.glaxier.taskmanagerapi.model.Task;
 import com.glaxier.taskmanagerapi.repository.TaskRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,12 +12,17 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class TaskServiceImpl implements TaskService{
+public class TaskServiceImpl implements TaskService {
     TaskRepository taskRepository;
 
     @Override
     public List<Task> findAll() {
         return taskRepository.findAll();
+    }
+
+    @Override
+    public Page<Task> findByUserId(String userId, Pageable pageable) {
+        return taskRepository.findByUserId(userId, pageable);
     }
 
     @Override

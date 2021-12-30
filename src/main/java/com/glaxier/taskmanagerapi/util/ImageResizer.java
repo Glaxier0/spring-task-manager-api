@@ -1,4 +1,4 @@
-package com.glaxier.taskmanagerapi.Util;
+package com.glaxier.taskmanagerapi.util;
 
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.tomcat.util.codec.binary.Base64;

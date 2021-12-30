@@ -1,4 +1,4 @@
-package com.glaxier.taskmanagerapi.model;
+package com.glaxier.taskmanagerapi.model.pojo;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +12,7 @@ import javax.validation.constraints.Size;
 @Setter
 @ToString
 public class UpdateUser {
+
     @Null(message = "Id update is forbidden.")
     private String id;
     @Size(min = 1, message = "Name length must be minimum 1.")
