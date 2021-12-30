@@ -1,4 +1,4 @@
-package com.glaxier.taskmanagerapi.service;
+package com.glaxier.taskmanagerapi.service.userdetails;
 
 import com.glaxier.taskmanagerapi.model.Users;
 import com.glaxier.taskmanagerapi.repository.UserRepository;

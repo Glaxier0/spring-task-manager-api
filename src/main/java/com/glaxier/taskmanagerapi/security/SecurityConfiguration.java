@@ -1,6 +1,6 @@
 package com.glaxier.taskmanagerapi.security;
 
-import com.glaxier.taskmanagerapi.service.UserDetailsServiceImpl;
+import com.glaxier.taskmanagerapi.service.userdetails.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,15 +17,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-        // securedEnabled = true,
-        // jsr250Enabled = true,
-        prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @AllArgsConstructor
 class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     UserDetailsServiceImpl userDetailsService;
-    //AuthEntryPointJwt unauthorizedHandler;
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {

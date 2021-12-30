@@ -1,7 +1,7 @@
 package com.glaxier.taskmanagerapi.security;
 
-import com.glaxier.taskmanagerapi.Util.JwtUtils;
-import com.glaxier.taskmanagerapi.service.UserDetailsServiceImpl;
+import com.glaxier.taskmanagerapi.service.userdetails.UserDetailsServiceImpl;
+import com.glaxier.taskmanagerapi.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;

@@ -1,10 +1,11 @@
-package com.glaxier.taskmanagerapi.service;
+package com.glaxier.taskmanagerapi.service.userdetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.glaxier.taskmanagerapi.model.Users;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;

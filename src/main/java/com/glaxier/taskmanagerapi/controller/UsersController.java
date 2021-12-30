@@ -1,12 +1,17 @@
 package com.glaxier.taskmanagerapi.controller;
 
-import com.glaxier.taskmanagerapi.Util.ImageResizer;
-import com.glaxier.taskmanagerapi.Util.JwtUtils;
-import com.glaxier.taskmanagerapi.model.*;
+import com.glaxier.taskmanagerapi.model.Users;
+import com.glaxier.taskmanagerapi.model.pojo.JwtResponse;
+import com.glaxier.taskmanagerapi.model.pojo.LoginForm;
+import com.glaxier.taskmanagerapi.model.pojo.ProfileResponse;
+import com.glaxier.taskmanagerapi.model.pojo.UpdateUser;
 import com.glaxier.taskmanagerapi.security.AuthTokenFilter;
-import com.glaxier.taskmanagerapi.service.PartialUpdate;
-import com.glaxier.taskmanagerapi.service.UserDetailsImpl;
 import com.glaxier.taskmanagerapi.service.UserService;
+import com.glaxier.taskmanagerapi.service.mailer.EmailService;
+import com.glaxier.taskmanagerapi.service.userdetails.UserDetailsImpl;
+import com.glaxier.taskmanagerapi.util.ImageResizer;
+import com.glaxier.taskmanagerapi.util.JwtUtils;
+import com.glaxier.taskmanagerapi.util.PartialUpdate;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
@@ -24,10 +29,10 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-
 
 @RestController
 @AllArgsConstructor
@@ -40,15 +45,22 @@ public class UsersController {
     JwtUtils jwtUtils;
     AuthTokenFilter authTokenFilter;
     ImageResizer imageResizer;
+    EmailService emailService;
 
     @PostMapping("/users/registration")
     public ResponseEntity<?> saveUser(@Valid @RequestBody Users user) {
         Optional<Users> usersData = userService.findByEmail(user.getEmail());
+
         if (usersData.isPresent()) {
             throw new DuplicateKeyException("Email already in use!");
         }
+
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setCreatedAt(now);
+        user.setUpdatedAt(now);
         userService.save(user);
+        emailService.sendWelcomeEmail(user.getName(), user.getEmail());
         return new ResponseEntity<>(new ProfileResponse(user.getId(), user.getName(),
                 user.getEmail(), user.getAge()), HttpStatus.CREATED);
     }
@@ -111,11 +123,6 @@ public class UsersController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    @GetMapping("/users")
-    public List<Users> getUsers() {
-        return userService.findAll();
-    }
-
     @GetMapping("/users/me")
     public ResponseEntity<?> getProfile(@RequestHeader HttpHeaders httpHeaders) {
         String token = jwtUtils.getToken(httpHeaders);
@@ -135,6 +142,7 @@ public class UsersController {
         }
         if (userData.isPresent()) {
             userData = partialUpdate.userPartialUpdate(user, userData);
+            userData.get().setUpdatedAt(ZonedDateTime.now(ZoneOffset.UTC));
             userService.save(userData.get());
             return new ResponseEntity<>(new ProfileResponse(userData.get().getId(), userData.get().getName(),
                     userData.get().getEmail(), userData.get().getAge()), HttpStatus.OK);
@@ -142,16 +150,22 @@ public class UsersController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping("/users")
-    public ResponseEntity<HttpStatus> deleteUsers() {
-        userService.deleteAll();
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     @DeleteMapping("/users/me")
     public ResponseEntity<HttpStatus> deleteProfile(@RequestHeader HttpHeaders httpHeaders) {
         String token = jwtUtils.getToken(httpHeaders);
-        userService.delete(userService.findByEmail(jwtUtils.getUserNameFromJwtToken(token)).get());
+        Users user = userService.findByEmail(jwtUtils.getUserNameFromJwtToken(token)).get();
+        userService.delete(user);
+        emailService.sendCancellationEmail(user.getName(), user.getEmail());
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @DeleteMapping("/users/me/avatar")
+    public ResponseEntity<HttpStatus> deleteAvatar(@RequestHeader HttpHeaders httpHeaders) {
+        String token = jwtUtils.getToken(httpHeaders);
+        Users user = userService.findByEmail(jwtUtils.getUserNameFromJwtToken(token)).get();
+        user.setAvatar(null);
+        userService.save(user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }
