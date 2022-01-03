@@ -5,7 +5,6 @@ plugins {
 }
 
 group = 'com.glaxier'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '16'
 targetCompatibility = "16"
 
